@@ -1,7 +1,7 @@
 IPRM-2014
 =========
 
-Projekt za predmet Matematika s funkcijskim programiranjem 2014/2015. Cilj projekta je izdelati ogrodje, ki omogoča izvedbo parsinga in unparsinga (pretty-printing) na enem mestu. Izvedba na konkretnem primeru parsanja nekega programskega jezika, recimo C.
+Projekt za predmet Matematika s funkcijskim programiranjem 2014/2015. Cilj projekta je izdelati ogrodje, ki omogoča izvedbo parsinga in unparsinga (pretty-printing) na enem mestu. Izvedba na konkretnem primeru parsanja nekega programskega jezika, recimo C. Pri preety-printingu bo uporabniku omogočeno določanje določenih parametrov, ki bodo določali, kako koda izgleda npr. uporaba tabulatorjev / presledkov, formatiranje blokov s samo enim stavkom, brisanje / ohranjanje komentarjev, ...
 
 Časovni načrt
 ---
