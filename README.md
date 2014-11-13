@@ -10,5 +10,6 @@ Projekt za predmet Matematika s funkcijskim programiranjem 2014/2015. Cilj proje
 Coding standard
 ---
 - tabs for indentation, spaces for alignment (beri: koda mora biti videti lepa, ne glede na širino znaka \t)
+- znak za konec vstice je striktno LF (ker R razvija na Linux, P pa na Windows)
 - HLint
 - V grobem se drživa nasvetov: https://stackoverflow.com/questions/1983047/good-haskell-coding-standards
