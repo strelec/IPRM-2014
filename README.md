@@ -1,15 +1,49 @@
-IPRM-2014
-=========
+Unified source code storage system
+==========
 
-Projekt za predmet Matematika s funkcijskim programiranjem 2014/2015. Cilj projekta je izdelati ogrodje, ki omogoča izvedbo parsinga in unparsinga (pretty-printing) na enem mestu. Izvedba na konkretnem primeru parsanja nekega programskega jezika, recimo C. Pri preety-printingu bo uporabniku omogočeno določanje določenih parametrov, ki bodo določali, kako koda izgleda npr. uporaba tabulatorjev / presledkov, formatiranje blokov s samo enim stavkom, brisanje / ohranjanje komentarjev, ...
+![Tabs vs spaces](http://www.emacswiki.org/pics/static/TabsSpacesBoth.png)
 
-Časovni načrt
+When you have had your last argument: tabs vs spaces? If you hadn't, we envy you. The fact is - there are many coding standards and pretty much every developer prefers its own. The companies or large teams of developers usually agree on the common list of rules to follow. Needless to say, this way of doing things turns out not to be as effective as it seems. It leads to unnecessary git commits because you have to make corrections after "that guy" -- and after a year of two, the source code is a mess anyway.
+
+How to solve this problem? Much has been written on this subject to date. There exist code reformatters, usually part of expensive IDEs, making you unable to integrate them into your workflow.
+
+This project allows the source code to always be stored in some predefined and/or compact meta format, which can be enforced via a git hook. However, when a programmer opens that file, it is pretty-printed according to his specification. The same, just inverted, process occurs when one saves / commits the file; the written source code is parsed back to that meta format.
+
+This project is based on InvertibleSyntax, described in a paper by Tillmann Rendel and Klaus Ostermann published in 2010.
+
+Batteries included
 ---
-- osnovni kosi kode narejeni do začetka 47. tedna v letu 2014.
+This project already includes the rules for the C programming language.
 
-Coding standard
+* `function_interspace` - number of blank between function definitions
+
+* `indentation` - amount of indentation per level
+
+	```haskell
+		data Indentation = Tabs
+		                 | Spaces Integer
+	```
+
+* `initial_indentation` - number of levels the whole file is indented with
+
+* `single_statement_braces`
+
+	```c
+		// False
+		while (condition)
+			statement
+
+		// True
+		while (condition) {
+			statement
+		}
+	```
+
+* to do...
+
+Coding standard of the project (as ironic as it might sound):
 ---
-- tabs for indentation, spaces for alignment (beri: koda mora biti videti lepa, ne glede na širino znaka \t)
-- znak za konec vstice je striktno LF (ker R razvija na Linux, P pa na Windows)
-- HLint
-- V grobem se drživa nasvetov: https://stackoverflow.com/questions/1983047/good-haskell-coding-standards
+- tabs for indentation, spaces for alignment
+- line ending is LF (multiple developers)
+- HLint (every commit must generally pass the check)
+- https://stackoverflow.com/questions/1983047/good-haskell-coding-standards
