@@ -2,6 +2,8 @@ module Text.Syntax.Parser.Naive where
 
 import Prelude (String, ($), map, (.))
 
+import Text.Syntax.Util (uncons)
+
 import Control.Category ()
 import Control.Isomorphism.Partial (IsoFunctor, (<$>), apply)
 import Control.Monad (Monad, return, fail, (>>=))
@@ -45,6 +47,4 @@ instance Alternative Parser where
 
 instance Syntax Parser where
   pure x =  Parser (\s -> [(x, s)])
-  token   =  Parser f where
-    f []      =  []
-    f (t:ts)  =  [(t, ts)]
+  token  =  Parser $ maybeToList . uncons
