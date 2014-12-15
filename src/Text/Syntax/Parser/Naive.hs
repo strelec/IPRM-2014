@@ -1,6 +1,6 @@
 module Text.Syntax.Parser.Naive where
 
-import Prelude (String, ($), map, (.))
+import Prelude (String, ($), map, (.), const)
 
 import Text.Syntax.Util (uncons)
 
@@ -43,7 +43,7 @@ instance ProductFunctor Parser where
 instance Alternative Parser where
   Parser p <|> Parser q
     = Parser (\s -> p s ++ q s)
-  empty = Parser (\s -> [])
+  empty = Parser $ const []
 
 instance Syntax Parser where
   pure x =  Parser (\s -> [(x, s)])
