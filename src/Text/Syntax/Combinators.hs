@@ -1,6 +1,9 @@
 module Text.Syntax.Combinators
   (  -- * Lexemes
      text
+  ,  letter
+  ,  digit
+  ,  space
      -- * Repetition
   ,  many
   ,  many1
@@ -18,12 +21,14 @@ module Text.Syntax.Combinators
   ,  sepSpace
   ,  optSpace) where
 
-import Prelude (String)
+import Prelude (String, Char)
+
+import Data.Char (isLetter, isDigit, isSpace)
 
 import Control.Category ((.))
 import Control.Isomorphism.Partial.Constructors (nothing, just, nil, cons, left, right)
 import Control.Isomorphism.Partial.Derived (foldl)
-import Control.Isomorphism.Partial.Prim (Iso, (<$>), inverse, element, unit, commute, ignore)
+import Control.Isomorphism.Partial.Prim (Iso, (<$>), inverse, element, unit, commute, ignore, subset)
 
 import Data.Maybe (Maybe)
 import Data.Either (Either)
@@ -85,6 +90,19 @@ sepBy :: Syntax delta => delta alpha -> delta () -> delta [alpha]
 sepBy x sep
   =    nil <$> text ""
   <|>  cons <$> x <*> many (sep *> x)
+
+
+letter :: Syntax delta => delta Char
+letter  =  subset isLetter <$> token
+
+digit :: Syntax delta => delta Char
+digit   =  subset isDigit  <$> token
+
+-- any whitespace character ( , \n, \r, \t, ...)
+space :: Syntax delta => delta Char
+space   =  subset isSpace  <$> token
+
+
 
 
 -- Expressing whitespace
