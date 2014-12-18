@@ -1,8 +1,6 @@
 module Text.Syntax.Combinators
   (  -- * Lexemes
      text
-  ,  comma
-  ,  dot
      -- * Repetition
   ,  many
   ,  many1
@@ -87,12 +85,6 @@ sepBy :: Syntax delta => delta alpha -> delta () -> delta [alpha]
 sepBy x sep
   =    nil <$> text ""
   <|>  cons <$> x <*> many (sep *> x)
-
-comma :: Syntax delta => delta ()
-comma = text ","
-
-dot :: Syntax delta => delta ()
-dot = text "."
 
 
 -- Expressing whitespace
