@@ -122,19 +122,19 @@ space   =  subset isSpace  <$> token
 -- no space while printing.
 
 skipSpace  ::  Syntax delta => delta ()
-skipSpace  =   ignore []    <$>  many (text " ")
+skipSpace  =   ignore "" <$> many space
 
 -- | `optSpace` marks a position where whitespace is desired to occur.
 -- It accepts arbitrary space while parsing, and produces a
 -- single space character while printing.
 
 optSpace  ::  Syntax delta => delta ()
-optSpace  =   ignore [()]  <$>  many (text " ")
+optSpace  =   ignore " " <$> many space
 
 -- | `sepSpace` marks a position where whitespace is required to
 -- occur. It requires one or more space characters while parsing,
 -- and produces a single space character while printing.
 
 sepSpace  ::  Syntax delta => delta ()
-sepSpace  =   text " " <* skipSpace
+sepSpace  =   ignore " " <$> many1 space
 
