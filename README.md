@@ -13,6 +13,17 @@ This project is based on InvertibleSyntax, described in a paper by Tillmann Rend
 
 Batteries included
 ---
+
+### JSON
+
+As a proof of concept, the JSON parser and pretty printer is included.
+
+Since, by definiton of the JSON standard, a number litaral can have arbitrary precision and size, the corresponding element of the abstract syntax is `Scientific` (requires Scientific package).
+
+The invertible parser library enables us to parse escape sequences to unicode codepoints and pretty print them back.
+
+### C
+
 This project already includes the rules for the C programming language.
 
 * `function_interspace` - number of blank between function definitions
