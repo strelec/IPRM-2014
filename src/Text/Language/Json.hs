@@ -22,13 +22,13 @@ import Control.Category ((.))
 -- Abstract Syntax
 
 data JValue
-    = String
-    | Scientific
+    = JString String
+    | JNumber String
     | JObject [(String, JValue)]
     | JArray [JValue]
-    | JTrue
-    | JFalse
+    | JBoolean Bool
     | JNull
+    deriving (Show, Eq)
 
 
 $(defineIsomorphisms ''JValue)
@@ -66,3 +66,27 @@ string = between (text "\"") (text "\"") (many char) where
 
 
 
+json :: Syntax delta => delta JValue
+json = value where
+
+    value
+        =   literal
+        <|> jString <$> string
+        <|> jNumber <$> number
+        <|> jArray  <$> array
+        <|> jObject <$> object
+
+    literal
+        =   jNull                    <$> text "null"
+        <|> element (JBoolean False) <$> text "false"
+        <|> element (JBoolean True)  <$> text "true"
+
+    number = many1 digit
+
+
+    sep c = between skipSpace optSpace $ text c
+
+    array = between (text "[") (text "]") (sepBy value $ sep ",")
+
+    object = between (text "{") (text "}") (sepBy pair $ sep ",") where
+        pair = string <* sep ":" <*> value
