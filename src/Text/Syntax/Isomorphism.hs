@@ -4,7 +4,10 @@ import Prelude (Ord, String, Int, (.), ($), fst, fmap)
 
 import Control.Isomorphism.Partial.Unsafe
 
-import Data.Bimap (Bimap, fromList, lookup, lookupR)
+import Data.Bimap (Bimap, lookup, lookupR)
+import qualified Data.Bimap as Bimap
+
+import Data.Map (Map, fromList, toList)
 
 import Data.Char (Char, ord, chr, intToDigit)
 
@@ -15,7 +18,7 @@ import Numeric
 -- bijection between two sets, uses Data.Bimap
 elements :: (Ord alpha, Ord beta) => [(alpha, beta)] -> Iso alpha beta
 elements pairs = Iso f g where
-	m = fromList pairs
+	m = Bimap.fromList pairs
 
 	f = (`lookup` m)
 	g = (`lookupR` m)
@@ -30,3 +33,7 @@ hexer :: Iso String Int
 hexer = Iso f g where
 	f x = fst `fmap` listToMaybe (readHex x)
 	g = Just . (`showHex` "")
+
+
+map :: Ord alpha => Iso [(alpha, beta)] (Map alpha beta)
+map = Iso (Just . fromList) (Just . toList)

@@ -1,12 +1,12 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Text.Language.Json where
 
-import Prelude hiding ((.))
+import Prelude hiding ((.), map)
 
 
 import Text.Syntax
 
-import Text.Syntax.Isomorphism (elements, codepoint, hexer)
+import Text.Syntax.Isomorphism (elements, codepoint, hexer, map)
 
 import Control.Isomorphism.Partial
 
@@ -16,6 +16,8 @@ import Data.Scientific
 
 import Data.Char (isControl)
 
+import Data.Map (Map)
+
 import Control.Category ((.))
 
 
@@ -24,7 +26,7 @@ import Control.Category ((.))
 data JValue
     = JString String
     | JNumber String
-    | JObject [(String, JValue)]
+    | JObject (Map String JValue)
     | JArray [JValue]
     | JBoolean Bool
     | JNull
@@ -74,7 +76,7 @@ json = value where
         <|> jString <$> string
         <|> jNumber <$> number
         <|> jArray  <$> array
-        <|> jObject <$> object
+        <|> jObject . map <$> object
 
     literal
         =   jNull                    <$> text "null"
