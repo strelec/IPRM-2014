@@ -4,7 +4,7 @@ import Prelude (String, const)
 
 import Control.Category ()
 import Control.Isomorphism.Partial (IsoFunctor ((<$>)), unapply)
-import Control.Monad (Monad, return, fail, (>>=), liftM2, mplus)
+import Control.Monad (Monad, return, fail, (>=>), liftM2, mplus)
 
 import Data.Eq (Eq ((==)))
 import Data.Function (($))
@@ -25,7 +25,7 @@ printM p x = maybe (fail "print error") return $ print p x
 
 instance IsoFunctor Printer where
   iso <$> Printer p
-    = Printer (\b -> unapply iso b >>= p)
+    = Printer $ unapply iso >=> p
 
 instance ProductFunctor Printer where
   Printer p <*> Printer q
