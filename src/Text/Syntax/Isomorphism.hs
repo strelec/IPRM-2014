@@ -13,7 +13,7 @@ import Data.Char (Char, ord, chr, intToDigit)
 
 import Data.Maybe (Maybe(Just), listToMaybe)
 
-import Numeric (readHex)
+import Numeric (readHex, showHex)
 
 -- bijection between two sets, uses Data.Bimap
 elements :: (Ord alpha, Ord beta) => [(alpha, beta)] -> Iso alpha beta
