@@ -13,7 +13,7 @@ import Data.Char (Char, ord, chr, intToDigit)
 
 import Data.Maybe (Maybe(Just), listToMaybe)
 
-import Numeric
+import Numeric (readHex)
 
 -- bijection between two sets, uses Data.Bimap
 elements :: (Ord alpha, Ord beta) => [(alpha, beta)] -> Iso alpha beta
@@ -31,7 +31,7 @@ codepoint = Iso (Just . chr) (Just . ord)
 -- hex number to decimal and back
 hexer :: Iso String Int
 hexer = Iso f g where
-	f x = fst `fmap` listToMaybe (readHex x)
+	f = fmap fst . listToMaybe . readHex
 	g = Just . (`showHex` "")
 
 
