@@ -18,7 +18,10 @@ Batteries included
 
 As a proof of concept, the JSON parser and pretty printer is included.
 
-Since, by definiton of the JSON standard, a number litaral can have arbitrary precision and size, the corresponding element of the abstract syntax is `Scientific` (requires Scientific package).
+We wanted to have the abstract syntax as accurate and usable as possible. Therefore:
+
+* JSON object is parsed to `Map String JValue` for efficient key lookup.
+* JSON string with escape sequences is unescaped, so you get the actual string you can use right away.
 
 The invertible parser library enables us to parse escape sequences to unicode codepoints and pretty print them back.
 
