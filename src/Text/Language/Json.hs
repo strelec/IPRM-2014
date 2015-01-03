@@ -35,6 +35,20 @@ data JValue
 
 $(defineIsomorphisms ''JValue)
 
+
+-- Configuration
+
+data JsonConfig = JsonConfig {
+    indent :: Int,
+    oneLevelIndent :: String
+} deriving (Show)
+
+defaultConfig = JsonConfig {
+    indent = 1,
+    oneLevelIndent = "    "
+}
+
+
 -- JSON string syntax
 
 escape = elements [
