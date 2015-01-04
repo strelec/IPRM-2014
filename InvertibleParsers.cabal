@@ -22,6 +22,7 @@ executable InvertibleParsers
   -- other-extensions:
   build-depends:       base >=4.7 && <4.8,
                        partial-isomorphisms >= 0.2,
+                       mtl,
                        bimap >= 0.2,
                        containers,
                        scientific
