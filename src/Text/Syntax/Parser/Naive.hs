@@ -5,7 +5,8 @@ import Prelude (String, ($), map, (.), const)
 import Text.Syntax.Util (uncons)
 
 import Control.Category ()
-import Control.Isomorphism.Partial (IsoFunctor, (<$>), apply)
+import Control.Isomorphism.Partial (apply)
+import Text.Syntax.Classes (IsoFunctor, (<$>))
 import Control.Monad (Monad, return, fail, (>>=))
 
 import Data.List ((++))

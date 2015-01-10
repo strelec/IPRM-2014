@@ -2,7 +2,7 @@ module Text.Syntax.Isomorphism where
 
 import Prelude (Ord, String, Int, (.), ($), fst, fmap)
 
-import Control.Isomorphism.Partial.Unsafe
+import Control.Isomorphism.Partial.Unsafe (Iso (Iso))
 
 import Data.Bimap (Bimap, lookup, lookupR)
 import qualified Data.Bimap as Bimap

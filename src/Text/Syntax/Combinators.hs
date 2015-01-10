@@ -28,7 +28,9 @@ import Data.Char (isLetter, isDigit, isSpace)
 import Control.Category ((.))
 import Control.Isomorphism.Partial.Constructors (nothing, just, nil, cons, left, right)
 import Control.Isomorphism.Partial.Derived (foldl)
-import Control.Isomorphism.Partial.Prim (Iso, (<$>), inverse, element, unit, commute, ignore, subset)
+import Control.Isomorphism.Partial.Prim (Iso, inverse, element, unit, commute, ignore, subset)
+
+import Text.Syntax.Classes ((<$>))
 
 import Data.Maybe (Maybe)
 import Data.Either (Either)

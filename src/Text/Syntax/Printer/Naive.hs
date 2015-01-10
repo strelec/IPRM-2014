@@ -3,7 +3,8 @@ module Text.Syntax.Printer.Naive where
 import Prelude (String, Maybe, const)
 
 import Control.Category ()
-import Control.Isomorphism.Partial (IsoFunctor ((<$>)), unapply)
+import Control.Isomorphism.Partial (unapply)
+import Text.Syntax.Classes (IsoFunctor ((<$>)))
 import Control.Monad (Monad, return, fail, (>>=), liftM2, mplus)
 import Control.Monad.Reader (ReaderT, runReaderT, lift)
 

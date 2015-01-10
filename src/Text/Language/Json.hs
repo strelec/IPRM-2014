@@ -7,8 +7,7 @@ import Prelude hiding ((.), map)
 import Text.Syntax
 
 import Text.Syntax.Isomorphism (elements, codepoint, hexer, map)
-
-import Control.Isomorphism.Partial
+import Control.Isomorphism.Partial (element, subset)
 
 import Control.Isomorphism.Partial.TH (defineIsomorphisms)
 
