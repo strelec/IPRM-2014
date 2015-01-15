@@ -9,7 +9,9 @@ import Control.Isomorphism.Partial.Unsafe (Iso (Iso))
 
 import Data.Eq (Eq)
 
-type MaybeR = ReaderT Int Maybe
+type Config = Int
+
+type MaybeR = ReaderT Config Maybe
 
 data IsoM alpha beta
   = IsoM (alpha -> Maybe beta) (beta -> MaybeR alpha)
@@ -33,6 +35,7 @@ infixr 6 <*>
 class IsoFunctor f where
   (<$>) :: Iso alpha beta -> f alpha -> f beta
   (<$$>) :: IsoM alpha beta -> f alpha -> f beta
+  (<-$>) :: (Config -> Config) -> f alpha -> f alpha
 
 class ProductFunctor f where
   (<*>) :: f alpha -> f beta -> f (alpha, beta)
