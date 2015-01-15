@@ -16,7 +16,7 @@ import Data.Char (Char, isControl)
 import Data.Map (Map)
 
 import Control.Category ((.))
-import Control.Monad.Reader (MonadReader, ask)
+import Control.Monad.Reader (MonadReader, ask, local, runReader)
 
 -- Abstract Syntax
 
@@ -80,17 +80,19 @@ string = between (text "\"") (text "\"") (many char) where
 data Hole = Hole
 
 
+ind :: IsoM [Char] ()
 ind = IsoM f g where
     f _ = return ()
     g () = do
             depth <- ask
-            return $ replicate depth ' '
-
+            return $ '\n' : replicate depth ' '
 
 json :: Syntax delta => delta JValue
-json = (ind <$$> many space) *> value where
+json = value where
 
-    value
+    value = (ind <$$> many space) *> rawValue
+
+    rawValue
         =   literal
         <|> jString <$> string
         <|> jNumber <$> number
@@ -109,5 +111,5 @@ json = (ind <$$> many space) *> value where
 
     array = between (text "[") (text "]") (sepBy value $ sep ",")
 
-    object = between (text "{") (text "}") (sepBy pair $ sep ",") where
+    object = (+5) <-$> between (text "{") (text "}") (sepBy pair $ sep ",") where
         pair = string <* sep ":" <*> value

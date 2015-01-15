@@ -11,7 +11,7 @@ import Data.Maybe (fromJust)
 
 -- not a final version, handle failure
 handle :: String -> String
-handle s = fromJust $ print json (head $ parse json s) 10
+handle s = fromJust $ print json (head $ parse json s) 0
 
 main :: IO ()
 main = interact handle
