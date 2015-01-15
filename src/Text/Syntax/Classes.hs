@@ -1,26 +1,28 @@
 module Text.Syntax.Classes where
 
-import Prelude (Maybe, Char)
+import Prelude (Maybe, Char, Int)
 
 import Control.Monad (Monad)
+import Control.Monad.Reader (ReaderT)
 
 import Control.Isomorphism.Partial.Unsafe (Iso (Iso))
 
 import Data.Eq (Eq)
 
+type MaybeR = ReaderT Int Maybe
 
-data (Monad m1, Monad m2) => IsoM alpha beta m1 m2
-  = IsoM (alpha -> m1 beta) (beta -> m2 alpha)
+data IsoM alpha beta
+  = IsoM (alpha -> Maybe beta) (beta -> MaybeR alpha)
 
 
-applyM :: (Monad m1, Monad m2) => IsoM alpha beta m1 m2 -> alpha -> m1 beta
+applyM :: IsoM alpha beta -> alpha -> Maybe beta
 applyM (IsoM f g) = f
 
-unapplyM :: (Monad m1, Monad m2) => IsoM alpha beta m1 m2 -> beta -> m2 alpha
+unapplyM :: IsoM alpha beta -> beta -> MaybeR alpha
 unapplyM (IsoM f g) = g
 
-fromIso :: Iso alpha beta -> IsoM alpha beta Maybe Maybe
-fromIso (Iso f g) = IsoM f g
+--fromIso :: Iso alpha beta -> IsoM alpha beta
+--fromIso (Iso f g) = IsoM f g
 
 
 infixl 3 <|>
@@ -30,7 +32,7 @@ infixr 6 <*>
 
 class IsoFunctor f where
   (<$>) :: Iso alpha beta -> f alpha -> f beta
-  (<$$>) :: IsoM alpha beta m1 m2 -> f alpha -> f alpha
+  (<$$>) :: IsoM alpha beta -> f alpha -> f beta
 
 class ProductFunctor f where
   (<*>) :: f alpha -> f beta -> f (alpha, beta)

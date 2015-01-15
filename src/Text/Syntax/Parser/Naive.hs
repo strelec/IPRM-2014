@@ -6,7 +6,7 @@ import Text.Syntax.Util (uncons)
 
 import Control.Category ()
 import Control.Isomorphism.Partial (apply)
-import Text.Syntax.Classes (IsoFunctor, (<$>))
+import Text.Syntax.Classes (IsoFunctor, (<$>), (<$$>), applyM)
 import Control.Monad (Monad, return, fail, (>>=))
 
 import Data.List ((++))
@@ -34,6 +34,10 @@ instance IsoFunctor Parser where
     = Parser (\s ->  [  (y, s')
                      |  (x, s')  <-  p s
                      ,  Just y   <-  [apply iso x] ])
+  isoM <$$> Parser p
+    = Parser (\s ->  [  (y, s')
+                     |  (x, s')  <-  p s
+                     ,  Just y   <-  [applyM isoM x] ])
 
 instance ProductFunctor Parser where
   Parser p <*> Parser q

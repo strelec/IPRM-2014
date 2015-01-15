@@ -4,9 +4,9 @@ import Prelude (String, Maybe, const)
 
 import Control.Category ()
 import Control.Isomorphism.Partial (unapply)
-import Text.Syntax.Classes (IsoFunctor ((<$>)))
+import Text.Syntax.Classes (IsoFunctor, MaybeR, (<$>), (<$$>), unapplyM)
 import Control.Monad (Monad, return, fail, (>>=), liftM2, mplus)
-import Control.Monad.Reader (ReaderT, runReaderT, lift)
+import Control.Monad.Reader (runReaderT, lift)
 
 import Data.Eq (Eq ((==)))
 import Data.Function (($))
@@ -18,15 +18,17 @@ import Text.Syntax.Classes (ProductFunctor ((<*>)), Alternative ((<|>), empty), 
 
 -- printer
 
-newtype Printer alpha = Printer (alpha -> ReaderT Char Maybe String)
+newtype Printer alpha = Printer (alpha -> MaybeR String)
 
-print :: Printer alpha -> alpha -> Maybe String
-print (Printer p) s = runReaderT (p s) 'u'
+print :: Printer alpha -> alpha -> Char -> Maybe String
+print (Printer p) s config = runReaderT (p s) config
 
 
 instance IsoFunctor Printer where
   iso <$> Printer p
     = Printer (\b -> lift (unapply iso b) >>= p)
+  isoM <$$> Printer p
+    = Printer (\b -> (unapplyM isoM b) >>= p)
 
 instance ProductFunctor Printer where
   Printer p <*> Printer q
