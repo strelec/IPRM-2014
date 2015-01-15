@@ -1,6 +1,6 @@
 module Text.Syntax.Printer.Naive where
 
-import Prelude (String, Maybe, const)
+import Prelude (String, Maybe, Int, const)
 
 import Control.Category ()
 import Control.Isomorphism.Partial (unapply)
@@ -20,7 +20,7 @@ import Text.Syntax.Classes (ProductFunctor ((<*>)), Alternative ((<|>), empty), 
 
 newtype Printer alpha = Printer (alpha -> MaybeR String)
 
-print :: Printer alpha -> alpha -> Char -> Maybe String
+print :: Printer alpha -> alpha -> Int -> Maybe String
 print (Printer p) s config = runReaderT (p s) config
 
 

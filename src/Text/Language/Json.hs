@@ -7,18 +7,16 @@ import Prelude hiding ((.), map)
 import Text.Syntax
 
 import Text.Syntax.Isomorphism (elements, codepoint, hexer, map)
-import Control.Isomorphism.Partial (element, subset)
+import Control.Isomorphism.Partial (element, subset, ignore)
 
 import Control.Isomorphism.Partial.TH (defineIsomorphisms)
 
-import Data.Scientific
-
-import Data.Char (isControl)
+import Data.Char (Char, isControl)
 
 import Data.Map (Map)
 
 import Control.Category ((.))
-
+import Control.Monad.Reader (MonadReader, ask)
 
 -- Abstract Syntax
 
@@ -79,10 +77,18 @@ string = between (text "\"") (text "\"") (many char) where
 
 -- Syntax
 
+data Hole = Hole
+
+
+ind = IsoM f g where
+    f _ = return ()
+    g () = do
+            depth <- ask
+            return $ replicate depth ' '
 
 
 json :: Syntax delta => delta JValue
-json = value where
+json = (ind <$$> many space) *> value where
 
     value
         =   literal
