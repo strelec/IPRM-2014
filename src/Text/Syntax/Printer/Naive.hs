@@ -4,7 +4,7 @@ import Prelude (String, Maybe, Int, const)
 
 import Control.Category ()
 import Control.Isomorphism.Partial (unapply)
-import Text.Syntax.Classes (IsoFunctor, MaybeR, (<$>), (<$$>), (<-$>), unapplyM)
+import Text.Syntax.Classes (IsoFunctor, MaybeR, (<$>), (<$$>), (<-$>), unapplyM, Config)
 import Control.Monad (Monad, return, fail, (>>=), liftM2, mplus)
 import Control.Monad.Reader (runReaderT, lift, local)
 
@@ -20,7 +20,7 @@ import Text.Syntax.Classes (ProductFunctor ((<*>)), Alternative ((<|>), empty), 
 
 newtype Printer alpha = Printer (alpha -> MaybeR String)
 
-print :: Printer alpha -> alpha -> Int -> Maybe String
+print :: Printer alpha -> alpha -> Config -> Maybe String
 print (Printer p) s config = runReaderT (p s) config
 
 

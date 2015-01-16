@@ -1,6 +1,6 @@
 module Text.Syntax.Classes where
 
-import Prelude (Maybe, Char, Int)
+import Prelude (Maybe, Char, Int, String, Bool, Show)
 
 import Control.Monad (Monad)
 import Control.Monad.Reader (ReaderT)
@@ -9,7 +9,15 @@ import Control.Isomorphism.Partial.Unsafe (Iso (Iso))
 
 import Data.Eq (Eq)
 
-type Config = Int
+-- TODO: make this polimorphic
+
+data JsonConfig = JsonConfig {
+    indentDepth :: Int,
+    indentOneLevel :: String,
+    unicodeEscape :: Bool
+} deriving (Show)
+
+type Config = JsonConfig
 
 type MaybeR = ReaderT Config Maybe
 

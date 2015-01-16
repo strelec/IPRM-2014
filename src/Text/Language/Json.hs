@@ -16,7 +16,7 @@ import Data.Char (Char, isControl)
 import Data.Map (Map)
 
 import Control.Category ((.))
-import Control.Monad.Reader (MonadReader, ask, local, runReader)
+import Control.Monad.Reader (ask)
 
 -- Abstract Syntax
 
@@ -35,15 +35,11 @@ $(defineIsomorphisms ''JValue)
 
 -- Configuration
 
-data JsonConfig = JsonConfig {
-    indent :: Int,
-    oneLevelIndent :: String
-} deriving (Show)
-
-defaultConfig = JsonConfig {
-    indent = 1,
-    oneLevelIndent = "    "
-}
+--data JsonConfig = JsonConfig {
+--    indent :: Int,
+--    oneLevelIndent :: String,
+--    unicodeEscape :: Bool
+--} deriving (Show)
 
 
 -- JSON string syntax
@@ -84,8 +80,12 @@ ind :: IsoM [Char] ()
 ind = IsoM f g where
     f _ = return ()
     g () = do
-            depth <- ask
-            return $ '\n' : replicate depth ' '
+            JsonConfig {indentDepth = depth, indentOneLevel = oneLevel} <- ask
+            return $ '\n' : (concat $ replicate depth oneLevel)
+
+increaseIndent :: JsonConfig -> JsonConfig
+increaseIndent c = c {indentDepth = 1 + indentDepth c}
+
 
 json :: Syntax delta => delta JValue
 json = value where
@@ -111,5 +111,5 @@ json = value where
 
     array = between (text "[") (text "]") (sepBy value $ sep ",")
 
-    object = (+5) <-$> between (text "{") (text "}") (sepBy pair $ sep ",") where
+    object = increaseIndent <-$> between (text "{") (text "}") (sepBy pair $ sep ",") where
         pair = string <* sep ":" <*> value
