@@ -2,17 +2,15 @@ module Text.Syntax.Parser.Naive where
 
 import Prelude (String, ($), map, (.), (++), const)
 
+import Text.Syntax.Classes (IsoFunctor ((<$>), (<$$>), (<-$>)), ProductFunctor ((<*>)), Alternative ((<|>), empty), Syntax (pure, token))
+import Text.Syntax.IsoM (applyM, fromIso)
 import Text.Syntax.Util (uncons)
 
-import Control.Isomorphism.Partial (apply)
-import Text.Syntax.Classes (IsoFunctor, (<$>), (<$$>), (<-$>), applyM, fromIso)
 import Control.Monad (Monad, return, fail, (>>=))
 
 import Data.Maybe (Maybe (Just), maybeToList)
 
-import Text.Syntax.Classes (ProductFunctor, Alternative, Syntax, (<*>), (<|>), empty, pure, token)
 
--- parser
 
 newtype Parser alpha
   = Parser (String -> [(alpha, String)])
@@ -26,6 +24,7 @@ parseM p s
        []        ->  fail "parse error"
        [result]  ->  return result
        _         ->  fail "ambiguous input"
+
 
 instance IsoFunctor Parser where
   iso <$> Parser p

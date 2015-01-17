@@ -2,14 +2,13 @@ module Text.Syntax.Printer.Naive where
 
 import Prelude (String, Maybe, Int, Char, const, (.), ($), (==), (++))
 
-import Control.Isomorphism.Partial (unapply)
-import Text.Syntax.Classes (IsoFunctor, MaybeR, (<$>), (<$$>), (<-$>), unapplyM, fromIso, Config)
+import Text.Syntax.Classes (IsoFunctor ((<$>), (<$$>), (<-$>)), ProductFunctor ((<*>)), Alternative ((<|>), empty), Syntax (pure, token))
+import Text.Syntax.IsoM (MaybeR, Config, unapplyM, fromIso)
+
 import Control.Monad (Monad, return, fail, (>=>), liftM2, mplus)
 import Control.Monad.Reader (runReaderT, local)
 
-import Text.Syntax.Classes (ProductFunctor ((<*>)), Alternative ((<|>), empty), Syntax (pure, token))
 
--- printer
 
 newtype Printer alpha = Printer (alpha -> MaybeR String)
 
@@ -33,7 +32,7 @@ instance ProductFunctor Printer where
 
 instance Alternative Printer where
   Printer p <|> Printer q
-    = Printer (\s -> mplus (p s) (q s))
+    = Printer (\s -> p s `mplus` q s)
 
   empty = Printer $ const $ fail "Empty."
 

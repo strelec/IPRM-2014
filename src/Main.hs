@@ -4,20 +4,10 @@ import Prelude hiding (print)
 
 import Text.Language.Json
 
--- TODO: remove later
-import Text.Syntax.Classes
-
 import Text.Syntax.Parser.Naive
 import Text.Syntax.Printer.Naive
 
 import Data.Maybe (fromJust)
-
-defaultConfig = JsonConfig {
-	indentDepth = 1,
-	indentOneLevel = "    ",
-	spaceAfterColon = True,
-	unicodeEscape = True
-}
 
 -- not a final version, handle failure
 handle :: String -> String

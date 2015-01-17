@@ -5,6 +5,7 @@ import Prelude hiding ((.), map)
 
 
 import Text.Syntax
+import Text.Syntax.IsoM
 
 import Text.Syntax.Isomorphism (elements, codepoint, hexer, map)
 import Control.Isomorphism.Partial (element, subset, ignore)
@@ -39,11 +40,18 @@ $(defineIsomorphisms ''JValue)
 -- Configuration
 
 --data JsonConfig = JsonConfig {
---    indent :: Int,
---    oneLevelIndent :: String,
+--    indentDepth :: Int,
+--    indentOneLevel :: String,
+--    spaceAfterColon :: Bool,
 --    unicodeEscape :: Bool
 --} deriving (Show)
 
+defaultConfig = JsonConfig {
+    indentDepth = 1,
+    indentOneLevel = "    ",
+    spaceAfterColon = True,
+    unicodeEscape = True
+}
 
 -- Config writing / reading isomorphisms
 

@@ -4,4 +4,5 @@ module Text.Syntax
   )  where
 
 import Text.Syntax.Classes
+import Text.Syntax.IsoM
 import Text.Syntax.Combinators
