@@ -76,7 +76,7 @@ string = between (text "\"") (text "\"") (many char) where
 data Hole = Hole
 
 
-indent :: IsoM [Char] ()
+indent :: IsoM String ()
 indent = IsoM f g where
     f _ = return ()
     g () = do
@@ -106,7 +106,7 @@ json = indented value where
         <|> jArray  <$> array
         <|> jObject . map <$> object
 
-    indented v = between (indent <$$> many space) ignoreSpace v
+    indented = between (indent <$$> many space) ignoreSpace
 
     literal
         =   jNull                    <$> text "null"
@@ -115,8 +115,14 @@ json = indented value where
 
     number = many1 digit
 
-    array = between (text "[" <* newline) (newline *> (indented $ text "]")) (sepBy element $ text "," <* newline) where
-        element = increaseIndent <-$> indented value
+    block opening closing separator element =
+        between
+            (text opening <* newline)
+            (newline *> indented (text closing))
+            (sepBy (increaseIndent <-$> indented element) $ text separator <* newline)
 
-    object = between (text "{" <* newline) (newline *> (indented $ text "}")) (sepBy pair $ text "," <* newline) where
-        pair = increaseIndent <-$> (indented $ string <* (between ignoreSpace ignoreSpace $ text ":") <*> value)
+    array = block "[" "]" "," value
+
+    object = block "{" "}" "," pair where
+        colon = between ignoreSpace ignoreSpace $ text ":"
+        pair = string <* colon <*> value
