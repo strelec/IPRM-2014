@@ -18,6 +18,9 @@ import Data.Map (Map)
 import Control.Category ((.))
 import Control.Monad.Reader (ask)
 
+data Hole = Hole
+
+
 -- Abstract Syntax
 
 data JValue
@@ -40,6 +43,27 @@ $(defineIsomorphisms ''JValue)
 --    oneLevelIndent :: String,
 --    unicodeEscape :: Bool
 --} deriving (Show)
+
+
+-- Config writing / reading isomorphisms
+
+indent :: IsoM String ()
+indent = IsoM f g where
+    f _ = return ()
+    g () = do
+            JsonConfig {indentDepth = depth, indentOneLevel = oneLevel} <- ask
+            return $ concat $ replicate depth oneLevel
+
+increaseIndent :: JsonConfig -> JsonConfig
+increaseIndent c = c {indentDepth = 1 + indentDepth c}
+
+
+spaceFromConfig :: IsoM String ()
+spaceFromConfig = IsoM f g where
+    f _ = return ()
+    g () = do
+            JsonConfig {spaceAfterColon = space} <- ask
+            return $ if space then " " else ""
 
 
 -- JSON string syntax
@@ -70,29 +94,6 @@ string = between (text "\"") (text "\"") (many char) where
 
     unicodeEscapeChar = (codepoint . hexer) <$> text "\\u" *> many1 digit
 
-
--- Config writing / reading isomorphisms
-
-data Hole = Hole
-
-
-indent :: IsoM String ()
-indent = IsoM f g where
-    f _ = return ()
-    g () = do
-            JsonConfig {indentDepth = depth, indentOneLevel = oneLevel} <- ask
-            return $ concat $ replicate depth oneLevel
-
-increaseIndent :: JsonConfig -> JsonConfig
-increaseIndent c = c {indentDepth = 1 + indentDepth c}
-
-
-spaceFromConfig :: IsoM String ()
-spaceFromConfig = IsoM f g where
-    f _ = return ()
-    g () = do
-            JsonConfig {spaceAfterColon = space} <- ask
-            return $ if space then " " else ""
 
 -- Syntax
 
