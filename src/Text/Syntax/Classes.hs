@@ -1,9 +1,9 @@
 module Text.Syntax.Classes where
 
-import Prelude (Maybe, Char, Int, String, Bool, Show)
+import Prelude (Maybe, Char, Int, (.), String, Bool, Show)
 
 import Control.Monad (Monad)
-import Control.Monad.Reader (ReaderT)
+import Control.Monad.Reader (ReaderT, lift)
 
 import Control.Isomorphism.Partial.Unsafe (Iso (Iso))
 
@@ -32,8 +32,8 @@ applyM (IsoM f g) = f
 unapplyM :: IsoM alpha beta -> beta -> MaybeR alpha
 unapplyM (IsoM f g) = g
 
---fromIso :: Iso alpha beta -> IsoM alpha beta
---fromIso (Iso f g) = IsoM f g
+fromIso :: Iso alpha beta -> IsoM alpha beta
+fromIso (Iso f g) = IsoM f (lift . g)
 
 
 infixl 3 <|>

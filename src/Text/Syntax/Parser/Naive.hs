@@ -1,15 +1,13 @@
 module Text.Syntax.Parser.Naive where
 
-import Prelude (String, ($), map, (.), const)
+import Prelude (String, ($), map, (.), (++), const)
 
 import Text.Syntax.Util (uncons)
 
-import Control.Category ()
 import Control.Isomorphism.Partial (apply)
-import Text.Syntax.Classes (IsoFunctor, (<$>), (<$$>), (<-$>), applyM)
+import Text.Syntax.Classes (IsoFunctor, (<$>), (<$$>), (<-$>), applyM, fromIso)
 import Control.Monad (Monad, return, fail, (>>=))
 
-import Data.List ((++))
 import Data.Maybe (Maybe (Just), maybeToList)
 
 import Text.Syntax.Classes (ProductFunctor, Alternative, Syntax, (<*>), (<|>), empty, pure, token)
@@ -31,14 +29,13 @@ parseM p s
 
 instance IsoFunctor Parser where
   iso <$> Parser p
-    = Parser (\s ->  [  (y, s')
-                     |  (x, s')  <-  p s
-                     ,  Just y   <-  [apply iso x] ])
+    = fromIso iso <$$> Parser p
+
   isoM <$$> Parser p
     = Parser (\s ->  [  (y, s')
                      |  (x, s')  <-  p s
                      ,  Just y   <-  [applyM isoM x] ])
-  f <-$> p = p
+  _ <-$> p = p
 
 instance ProductFunctor Parser where
   Parser p <*> Parser q

@@ -1,20 +1,13 @@
 module Text.Syntax.Printer.Naive where
 
-import Prelude (String, Maybe, Int, const)
+import Prelude (String, Maybe, Int, Char, const, (.), ($), (==), (++))
 
-import Control.Category ()
 import Control.Isomorphism.Partial (unapply)
-import Text.Syntax.Classes (IsoFunctor, MaybeR, (<$>), (<$$>), (<-$>), unapplyM, Config)
-import Control.Monad (Monad, return, fail, (>>=), liftM2, mplus)
-import Control.Monad.Reader (runReaderT, lift, local)
-
-import Data.Eq (Eq ((==)))
-import Data.Function (($))
-import Data.List ((++))
-import Data.Char (Char)
+import Text.Syntax.Classes (IsoFunctor, MaybeR, (<$>), (<$$>), (<-$>), unapplyM, fromIso, Config)
+import Control.Monad (Monad, return, fail, (>=>), liftM2, mplus)
+import Control.Monad.Reader (runReaderT, local)
 
 import Text.Syntax.Classes (ProductFunctor ((<*>)), Alternative ((<|>), empty), Syntax (pure, token))
-
 
 -- printer
 
@@ -26,13 +19,13 @@ print (Printer p) s config = runReaderT (p s) config
 
 instance IsoFunctor Printer where
   iso <$> Printer p
-    = Printer (\b -> lift (unapply iso b) >>= p)
+    = fromIso iso <$$> Printer p
+
   isoM <$$> Printer p
-    = Printer (\b -> (unapplyM isoM b) >>= p)
+    = Printer $ unapplyM isoM >=> p
+
   transform <-$> Printer p
-    = Printer (\b ->
-        local transform (p b)
-      )
+    = Printer $ local transform . p
 
 instance ProductFunctor Printer where
   Printer p <*> Printer q
