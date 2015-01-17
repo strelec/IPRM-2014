@@ -15,11 +15,7 @@ module Text.Syntax.Combinators
   ,  between
      -- * Alternation
   ,  (<+>)
-  ,  optional
-     -- * Whitespace
-  ,  skipSpace
-  ,  sepSpace
-  ,  optSpace) where
+  ,  optional) where
 
 import Prelude (String, Char)
 
@@ -103,40 +99,3 @@ digit   =  subset isDigit  <$> token
 -- any whitespace character ( , \n, \r, \t, ...)
 space :: Syntax delta => delta Char
 space   =  subset isSpace  <$> token
-
-
-
-
--- Expressing whitespace
--- ---------------------
---
--- Parsers and pretty printers treat whitespace
--- differently. Parsers
--- specify where whitespace is allowed or required to occur, while
--- pretty printers specify how much whitespace is to be inserted at
--- these locations. To account for these different roles of
--- whitespace, the following three syntax descriptions provide
--- fine-grained control over where whitespace is allowed, desired or
--- required to occur.
-
--- | `skipSpace` marks a position where whitespace is allowed to
--- occur. It accepts arbitrary space while parsing, and produces
--- no space while printing.
-
-skipSpace  ::  Syntax delta => delta ()
-skipSpace  =   ignore "" <$> many space
-
--- | `optSpace` marks a position where whitespace is desired to occur.
--- It accepts arbitrary space while parsing, and produces a
--- single space character while printing.
-
-optSpace  ::  Syntax delta => delta ()
-optSpace  =   ignore " " <$> many space
-
--- | `sepSpace` marks a position where whitespace is required to
--- occur. It requires one or more space characters while parsing,
--- and produces a single space character while printing.
-
-sepSpace  ::  Syntax delta => delta ()
-sepSpace  =   ignore " " <$> many1 space
-
