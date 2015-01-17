@@ -17,6 +17,14 @@ data JsonConfig = JsonConfig {
 
 type Config = JsonConfig
 
+
+-- data ConfigC = ConfigC {
+		-- brackets::Bool,
+		-- ifNewLine::Bool
+-- } deriving (Show)
+
+-- type Config = ConfigC
+
 type MaybeR = ReaderT Config Maybe
 
 data IsoM alpha beta
