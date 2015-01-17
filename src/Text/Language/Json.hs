@@ -71,33 +71,42 @@ string = between (text "\"") (text "\"") (many char) where
     unicodeEscapeChar = (codepoint . hexer) <$> text "\\u" *> many1 digit
 
 
--- Syntax
+-- Config writing / reading isomorphisms
 
 data Hole = Hole
 
 
-ind :: IsoM [Char] ()
-ind = IsoM f g where
+indent :: IsoM [Char] ()
+indent = IsoM f g where
     f _ = return ()
     g () = do
             JsonConfig {indentDepth = depth, indentOneLevel = oneLevel} <- ask
-            return $ '\n' : (concat $ replicate depth oneLevel)
+            return $ concat $ replicate depth oneLevel
 
 increaseIndent :: JsonConfig -> JsonConfig
 increaseIndent c = c {indentDepth = 1 + indentDepth c}
 
 
+
+-- Syntax
+
+newline :: Syntax delta => delta ()
+newline = ignore "\n" <$> many space
+
+ignoreSpace :: Syntax delta => delta ()
+ignoreSpace  =   ignore "" <$> many space
+
 json :: Syntax delta => delta JValue
-json = value where
+json = indented value where
 
-    value = (ind <$$> many space) *> rawValue
-
-    rawValue
+    value
         =   literal
         <|> jString <$> string
         <|> jNumber <$> number
         <|> jArray  <$> array
         <|> jObject . map <$> object
+
+    indented v = between (indent <$$> many space) ignoreSpace v
 
     literal
         =   jNull                    <$> text "null"
@@ -106,10 +115,8 @@ json = value where
 
     number = many1 digit
 
+    array = between (text "[" <* newline) (newline *> (indented $ text "]")) (sepBy element $ text "," <* newline) where
+        element = increaseIndent <-$> indented value
 
-    sep c = between skipSpace optSpace $ text c
-
-    array = between (text "[") (text "]") (sepBy value $ sep ",")
-
-    object = increaseIndent <-$> between (text "{") (text "}") (sepBy pair $ sep ",") where
-        pair = string <* sep ":" <*> value
+    object = between (text "{" <* newline) (newline *> (indented $ text "}")) (sepBy pair $ text "," <* newline) where
+        pair = increaseIndent <-$> (indented $ string <* (between ignoreSpace ignoreSpace $ text ":") <*> value)
