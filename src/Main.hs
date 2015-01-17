@@ -15,6 +15,7 @@ import Data.Maybe (fromJust)
 defaultConfig = JsonConfig {
 	indentDepth = 1,
 	indentOneLevel = "    ",
+	spaceAfterColon = True,
 	unicodeEscape = True
 }
 

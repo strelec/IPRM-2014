@@ -14,6 +14,7 @@ import Data.Eq (Eq)
 data JsonConfig = JsonConfig {
     indentDepth :: Int,
     indentOneLevel :: String,
+    spaceAfterColon :: Bool,
     unicodeEscape :: Bool
 } deriving (Show)
 

@@ -87,6 +87,12 @@ increaseIndent :: JsonConfig -> JsonConfig
 increaseIndent c = c {indentDepth = 1 + indentDepth c}
 
 
+spaceFromConfig :: IsoM String ()
+spaceFromConfig = IsoM f g where
+    f _ = return ()
+    g () = do
+            JsonConfig {spaceAfterColon = space} <- ask
+            return $ if space then " " else ""
 
 -- Syntax
 
@@ -124,5 +130,5 @@ json = indented value where
     array = block "[" "]" "," value
 
     object = block "{" "}" "," pair where
-        colon = between ignoreSpace ignoreSpace $ text ":"
+        colon = between ignoreSpace (spaceFromConfig <$$> many space) $ text ":"
         pair = string <* colon <*> value
