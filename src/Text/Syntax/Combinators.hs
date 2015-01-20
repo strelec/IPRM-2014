@@ -7,6 +7,8 @@ module Text.Syntax.Combinators
      -- * Repetition
   ,  many
   ,  many1
+  ,  many2
+  ,  many3
   ,  sepBy
   ,  chainl1
      -- * Sequencing
@@ -40,6 +42,15 @@ many p
 
 many1 :: Syntax delta => delta alpha -> delta [alpha]
 many1 p = cons <$> p <*> many p
+
+many2 :: Syntax delta => delta alpha -> delta [alpha]
+many2 p = cons <$> p <*> many1 p
+
+many3 :: Syntax delta => delta alpha -> delta alpha -> delta [alpha]
+many3 p q
+  =    nil   <$>  pure ()
+  <|>  cons  <$>  p <*>  many3 p q
+  <|>  cons  <$>  q <*>  many p
 
 infixl 4 <+>
 
