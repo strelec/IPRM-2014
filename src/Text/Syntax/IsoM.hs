@@ -19,6 +19,8 @@ type Config = JsonConfig
 
 
 -- data ConfigC = ConfigC {
+		-- indentDepth :: Int,
+		-- indentOneLevel :: String,
 		-- brackets::Bool,
 		-- ifNewLine::Bool
 -- } deriving (Show)

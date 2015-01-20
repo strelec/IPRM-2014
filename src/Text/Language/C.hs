@@ -9,6 +9,8 @@ import Text.Syntax.IsoM
 
 import Text.Syntax.Isomorphism (elements, codepoint, hexer, map)
 import Control.Isomorphism.Partial (element, subset, ignore)
+import Control.Isomorphism.Partial.Prim (inverse)
+import Control.Isomorphism.Partial.Constructors (nil, cons, listCases, right)
 
 import Control.Isomorphism.Partial.TH (defineIsomorphisms)
 
@@ -24,38 +26,10 @@ import Control.Isomorphism.Partial.Unsafe (Iso (Iso))
 defaultConfig = ConfigC {
     indentDepth = -1, --file zaenkrat parsamo kot block in vsak block doda indent, tko da  je -1 da je začetni indent 0
     indentOneLevel = "\t",
-	brackets = True,
+	brackets = False,
 	ifNewLine = True}
 
 
-nil :: Iso () ([a])
-cons :: Iso (a, [a]) ([a])
-
-nil = Iso (\ () -> Just [])
-			(\ xs -> case xs of
-						[] -> Just ()
-						(x:xs) -> Nothing)
-
-cons = Iso (\ (x, xs) -> Just (x:xs))
-			(\ xs -> case xs of
-						[] -> Nothing
-						(x:xs) -> Just (x,xs))
-
-						
-inverse :: Iso alpha beta -> Iso beta alpha
-inverse (Iso f g) = Iso g f
-
-
-
-$(defineIsomorphisms ''Either)
-
-
-listCases:: Iso (Either () (a,[a])) [a]
-listCases = Iso f g where
-	f (Left()) = Just []
-	f (Right(x,xs)) = Just (x:xs)
-	g [] = Just (Left())
-	g (x:xs) = Just (Right(x,xs))
 
 -- Abstract Syntax
 
@@ -79,6 +53,7 @@ data Expression
 data Statement
 	= IfThen Expression Block
 	| IfThenElse Expression Block Block
+	| WhileStat Expression Block
 	-- | Return Expression
 	deriving (Show, Eq)
 
@@ -97,6 +72,10 @@ $(defineIsomorphisms ''Statement)
 $(defineIsomorphisms ''Operator)
 
 
+unOps :: Syntax f => f Operator
+unOps = addOp <$> text "+" 
+	<|> subOp <$> text "-"
+	
 ops :: Syntax f => f Operator
 ops = mulOp <$> text "*" 
 	<|> addOp <$> text "+" 
@@ -135,8 +114,13 @@ parens = between (text "(" <* skipSpace) (skipSpace *> text ")")
 
 curly_parens :: Syntax d => d a -> d a
 curly_parens = between 
-				((indent <$$> many space) *>  text "{" <* newline)
-				((indent <$$> many space) *> text "}" <* newline)
+				((indent <$$> many space) *> text "{" <* newline)
+				((indent <$$> many space) *> text "}")
+
+-- optParens :: Syntax d => d a -> d a
+-- optParens = between (newline <|> (newline *> text "{" <* skipSpace))
+					-- ((skipSpace *> text "}" <* newline) <|> newline)
+
 
 spacedOps :: Syntax d => d Operator
 spacedOps = between optSpace optSpace ops
@@ -165,6 +149,8 @@ expression = exp 3 where
 	exp 0 = literal <$> integer
 			<|> variable <$> identifier
 			<|> parens expression
+			-- <|> unaryOp <$> unOps <*> expression
+			
 			
 
 	exp 1 = chainl1 (exp 0) spacedOps (binOpPrio 1)
@@ -172,24 +158,60 @@ expression = exp 3 where
 	exp 3 = chainl1 (exp 2) spacedOps (binOpPrio 3)
 
 	binOpPrio n = binOp . subset (\ (x,(op,y)) -> priority op == n)
-	-- (unaryOp <$> (SubOp <+> AddOp) <*> expression)
 
 
 statement :: Syntax d => d Statement
 statement = 
 	ifThenElse <$> keyword "if" *> optSpace *> parens expression 
 				<*> block 
-				<*> keyword "else" *> block
+				<*> newline*> (indent <$$> many space) *> keyword "else" *> block
 	<|> ifThen <$> keyword "if" *> optSpace *> parens expression 
 				<*> block
+	<|> whileStat <$> keyword "while" *> optSpace *> parens expression
+					<*> block
+	-- <|> caseStat <$> keyword "case" *> optSpace *> parens expression
+					-- <*> block
 
 elementC :: Syntax d => d ElementC
 elementC = 
-	element1 <$> (indent <$$> many space) *> statement
+	element1 <$> (indent <$$> many space) *> statement <* newline
 	<|> element2 <$> (indent <$$> many space) *> expression <* skipSpace <* text ";" <* newline
+
+br1 :: IsoM String ()
+br1 = IsoM f g where
+    f _ = return ()
+    g () = do
+            ConfigC {brackets = br, indentDepth = depth, indentOneLevel = oneLevel} <- ask
+            return $ (if br then concat $ replicate depth oneLevel ++["{\n"] else "\n")
+
+br2 :: IsoM String ()
+br2 = IsoM f g where
+    f _ = return ()
+    g () = do
+            ConfigC {brackets = br, indentDepth = depth, indentOneLevel = oneLevel} <- ask
+            return $ (if br then concat $ replicate depth oneLevel ++["}"] else "")
+
+
+br3 :: Syntax d => IsoM (d ElementC) (d ElementC)
+-- br3 :: IsoM ElementC ElementC
+br3 = IsoM f g where
+    f x = return x
+    g x = do
+            ConfigC {brackets = br} <- ask
+            return (if br then text "{" *> x <* text "}" else x)
+
 
 block :: Syntax d => d Block
 block = 
-	singleBlock <$> newline *> (increaseIndent <-$> elementC)
-	<|> multiBlock <$> newline *> curly_parens (increaseIndent <-$> many elementC)
-
+	multiBlock <$> newline *> curly_parens (increaseIndent <-$> many2 elementC)
+	
+	-- <|> singleBlock <$> (br3 <$$> sb)
+	<|> singleBlock <$> (br1 <$$> many3 space ((subset (\x -> x == '{')) <$> token)) *> sb <* (br2 <$$> many3 space ((subset (\x -> x == '}')) <$> token))
+	
+	where
+	
+	-- sb = return $ (increaseIndent <-$> elementC)
+	sb = (increaseIndent <-$> elementC)
+	
+		
+		
