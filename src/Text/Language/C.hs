@@ -24,9 +24,9 @@ import Control.Monad.Reader (ask)
 import Control.Isomorphism.Partial.Unsafe (Iso (Iso))
 
 defaultConfig = ConfigC {
-    indentDepth = -1, --file zaenkrat parsamo kot block in vsak block doda indent, tko da  je -1 da je začetni indent 0
+    indentDepth = 0,
     indentOneLevel = "\t",
-	brackets = False,
+	brackets = True,
 	ifNewLine = True}
 
 
@@ -46,16 +46,30 @@ data ElementC
 data Expression
     = Variable String
     | Literal Integer
-    | UnaryOp Operator Expression
+	| Real Double
+	| Cstring String
+    -- | UnaryOp Operator Expression
     | BinOp Expression Operator Expression
+	| Fprint String
 	deriving (Show, Eq)
 
 data Statement
 	= IfThen Expression Block
 	| IfThenElse Expression Block Block
 	| WhileStat Expression Block
+	| Function String String [String] Block
 	-- | Return Expression
 	deriving (Show, Eq)
+
+data ImportC
+	= Import1 String
+
+data FileElement
+	= FileImport ImportC
+	| FileElementC ElementC
+
+data File
+	= File1 [FileElement]
 
 data Operator
 	= AddOp
@@ -70,6 +84,9 @@ $(defineIsomorphisms ''ElementC)
 $(defineIsomorphisms ''Expression)
 $(defineIsomorphisms ''Statement)
 $(defineIsomorphisms ''Operator)
+$(defineIsomorphisms ''File)
+$(defineIsomorphisms ''ImportC)
+$(defineIsomorphisms ''FileElement)
 
 
 unOps :: Syntax f => f Operator
@@ -93,18 +110,28 @@ newline = ignore "\n" <$> many space
 
 
 integer::Syntax d => d Integer
-integer = Iso read' show' <$> many digit where
+integer = Iso read' show' <$> (many digit <|> (cons <$> (thisChar '-') <*> many digit)) where
 	read' s = case[x|(x,"")<-reads s] of
 				[] -> Nothing
 				(x:_) -> Just x
 	show' x = Just(show x)			
+
+double::Syntax d => d Double
+double = Iso read' show' <$> ((many3 digit (thisChar '.')) <|> (cons <$> (thisChar '-') <*> many3 digit (thisChar '.'))) where
+	read' s = case[x|(x,"") <- (reads s::[(Double,String)])] of
+				(x:_) -> Just x
+				[] -> Nothing
+	show' x = Just(show x)			
+		
 			
 			
-			
-keywords = ["else","for","while","True","False","global","switch","case","return"]
+keywords = ["else","for","while","True","False","global","switch","case","return", "#include", "printf"]
 
 identifier :: Syntax f => f [Char]
 identifier = subset (`notElem` keywords) . cons <$> letter <*> many (letter <|> digit)
+
+fileName :: Syntax f => f [Char]
+fileName = subset (`notElem` keywords) . cons <$> letter <*> many3 (letter <|> digit) ((subset (\x -> x == '.')) <$> token)
 
 keyword::Syntax d => String -> d ()
 keyword s = inverse right <$> (identifier <+> text s)
@@ -124,6 +151,35 @@ curly_parens = between
 
 spacedOps :: Syntax d => d Operator
 spacedOps = between optSpace optSpace ops
+
+
+escape = elements [
+        ('"', '"'),
+        ('\\', '\\'),
+        ('/', '/'),
+        ('b', '\b'),
+        ('f', '\f'),
+        ('n', '\n'),
+        ('r', '\r'),
+        ('t', '\t')
+    ]
+
+
+string :: Syntax delta => delta String
+string = between (text "\"") (text "\"") (many char) where
+
+    char = bareChar <|> escapeChar <|> unicodeEscapeChar
+
+    bareChar = subset isBare <$> token where
+        isBare '"' = False
+        isBare '\\' = False
+        isBare c = not $ isControl c
+
+    escapeChar = escape <$> text "\\" *> token
+
+    unicodeEscapeChar = (codepoint . hexer) <$> text "\\u" *> many1 digit
+
+	
 
 priority:: Operator -> Integer
 priority MulOp = 1
@@ -147,9 +203,11 @@ increaseIndent c = c {indentDepth = 1 + indentDepth c}
 expression:: Syntax d => d Expression
 expression = exp 3 where
 	exp 0 = literal <$> integer
+			<|> cstring <$> string
+			<|> real <$> double
 			<|> variable <$> identifier
+			<|> fprint <$> keyword "printf" *> parens string
 			<|> parens expression
-			-- <|> unaryOp <$> unOps <*> expression
 			
 			
 
@@ -169,6 +227,9 @@ statement =
 				<*> block
 	<|> whileStat <$> keyword "while" *> optSpace *> parens expression
 					<*> block
+	-- tip funkcije je zaenkrat obravnavan kot spremenljivka, ceprav bi morale bit 
+	-- dolocene moznosti
+	<|> function <$> identifier <*> sepSpace *> identifier <*> optSpace *> parens (many identifier) <*> block
 	-- <|> caseStat <$> keyword "case" *> optSpace *> parens expression
 					-- <*> block
 
@@ -206,12 +267,24 @@ block =
 	multiBlock <$> newline *> curly_parens (increaseIndent <-$> many2 elementC)
 	
 	-- <|> singleBlock <$> (br3 <$$> sb)
-	<|> singleBlock <$> (br1 <$$> many3 space ((subset (\x -> x == '{')) <$> token)) *> sb <* (br2 <$$> many3 space ((subset (\x -> x == '}')) <$> token))
+	-- <|> singleBlock <$> (curly_parens (sb) <|> newline *> sb)
+	<|> singleBlock <$> (br1 <$$> many3 space (thisChar '{')) *> sb <* (br2 <$$> many3 space (thisChar '}'))
 	
 	where
 	
 	-- sb = return $ (increaseIndent <-$> elementC)
 	sb = (increaseIndent <-$> elementC)
 	
-		
-		
+
+importC :: Syntax d => d ImportC
+importC = 
+	import1 <$> keyword "#include" *> sepSpace *> between (text "<") (text ">") fileName <* newline
+
+fileElement	 :: Syntax d => d FileElement
+fileElement = 
+	fileImport <$> importC
+	<|> fileElementC <$> elementC
+	
+
+file :: Syntax d => d File
+file = file1 <$> many4 (fileImport <$> importC) (fileElementC <$> elementC)

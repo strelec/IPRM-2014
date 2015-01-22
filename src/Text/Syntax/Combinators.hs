@@ -9,6 +9,7 @@ module Text.Syntax.Combinators
   ,  many1
   ,  many2
   ,  many3
+  ,  many4
   ,  sepBy
   ,  chainl1
      -- * Sequencing
@@ -17,9 +18,10 @@ module Text.Syntax.Combinators
   ,  between
      -- * Alternation
   ,  (<+>)
-  ,  optional) where
+  ,  optional
+  ,  thisChar) where
 
-import Prelude (String, Char)
+import Prelude (String, Char, (==))
 
 import Data.Char (isLetter, isDigit, isSpace)
 
@@ -51,6 +53,12 @@ many3 p q
   =    nil   <$>  pure ()
   <|>  cons  <$>  p <*>  many3 p q
   <|>  cons  <$>  q <*>  many p
+
+many4 :: Syntax delta => delta alpha -> delta alpha -> delta [alpha]
+many4 p q
+  =    nil   <$>  pure ()
+  <|>  cons  <$>  p <*>  many4 p q
+  <|>  cons  <$>  q <*>  many q
 
 infixl 4 <+>
 
@@ -108,3 +116,6 @@ digit   =  subset isDigit  <$> token
 -- any whitespace character ( , \n, \r, \t, ...)
 space :: Syntax delta => delta Char
 space   =  subset isSpace  <$> token
+
+thisChar :: Syntax delta => Char -> delta Char
+thisChar ch = (subset (\x -> x == ch)) <$> token
