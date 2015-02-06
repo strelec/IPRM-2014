@@ -2,21 +2,24 @@ module Main where
 
 import Prelude hiding (print)
 
-import Text.Language.Json
--- import Text.Language.C
+import Text.Language.Json (json, defaultConfig)
+-- import Text.Language.C (c, defaultConfig, CConfig)
 
-import Text.Syntax.Parser.Naive
-import Text.Syntax.Printer.Naive
+import Text.Syntax.Parser.Naive (parse)
+import Text.Syntax.Printer.Naive (print)
 
-import Data.Maybe (fromJust)
+import Data.Maybe (fromMaybe)
 
--- not a final version, handle failure
+
+
 handle :: String -> String
-handle s = fromJust $ print json (head $ parse json s) defaultConfig
-	
--- handle :: String -> String
--- handle s = fromJust $ print block (head $ parse block s) defaultConfig
+handle s =
+	case parse json s of
+		[x] -> fromMaybe errorMsg printMaybe where
+			printMaybe = print json x defaultConfig
+			errorMsg   = "Printer error. This should not happen. Open a bug."
+		_   -> "You have a syntax error in the file."
 
-	
+
 main :: IO ()
 main = interact handle
