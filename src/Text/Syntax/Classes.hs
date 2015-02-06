@@ -2,7 +2,7 @@ module Text.Syntax.Classes where
 
 import Prelude (Char, Eq)
 
-import Text.Syntax.IsoM (IsoM, Config)
+import Text.Syntax.IsoM (IsoM)
 import Control.Isomorphism.Partial.Prim (Iso)
 
 
@@ -12,16 +12,16 @@ infix  5 <$$>
 infixr 6 <*>
 
 class IsoFunctor f where
-  (<$>) :: Iso alpha beta -> f alpha -> f beta
-  (<$$>) :: IsoM alpha beta -> f alpha -> f beta
-  (<-$>) :: (Config -> Config) -> f alpha -> f alpha
+  (<$>) :: Iso alpha beta -> f c alpha -> f c beta
+  (<$$>) :: IsoM c alpha beta -> f c alpha -> f c beta
+  (<-$>) :: (c -> c) -> f c alpha -> f c alpha
 
 class ProductFunctor f where
-  (<*>) :: f alpha -> f beta -> f (alpha, beta)
+  (<*>) :: f c alpha -> f c beta -> f c (alpha, beta)
 
 class Alternative f where
-  (<|>) :: f alpha -> f alpha -> f alpha
-  empty :: f alpha
+  (<|>) :: f c alpha -> f c alpha -> f c alpha
+  empty :: f c alpha
 
 class (IsoFunctor delta, ProductFunctor delta, Alternative delta)
    => Syntax delta where
@@ -31,5 +31,5 @@ class (IsoFunctor delta, ProductFunctor delta, Alternative delta)
   -- (<*>)   ::  delta alpha -> delta beta -> delta (alpha, beta)
   -- (<|>)   ::  delta alpha -> delta alpha -> delta alpha
   -- empty   ::  delta alpha
-  pure   ::  Eq alpha => alpha -> delta alpha
-  token  ::  delta Char
+  pure   ::  Eq alpha => alpha -> delta c alpha
+  token  ::  delta c Char

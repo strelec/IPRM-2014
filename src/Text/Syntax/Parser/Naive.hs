@@ -12,13 +12,13 @@ import Data.Maybe (Maybe (Just), maybeToList)
 
 
 
-newtype Parser alpha
+newtype Parser c alpha
   = Parser (String -> [(alpha, String)])
 
-parse :: Parser alpha -> String -> [alpha]
+parse :: Parser c alpha -> String -> [alpha]
 parse (Parser p) s = [ x | (x, "") <- p s ]
 
-parseM :: Monad m => Parser alpha -> String -> m alpha
+parseM :: Monad m => Parser c alpha -> String -> m alpha
 parseM p s
   =  case parse p s of
        []        ->  fail "parse error"

@@ -39,12 +39,12 @@ $(defineIsomorphisms ''JValue)
 
 -- Configuration
 
---data JsonConfig = JsonConfig {
---    indentDepth :: Int,
---    indentOneLevel :: String,
---    spaceAfterColon :: Bool,
---    unicodeEscape :: Bool
---} deriving (Show)
+data JsonConfig = JsonConfig {
+    indentDepth :: Int,
+    indentOneLevel :: String,
+    spaceAfterColon :: Bool,
+    unicodeEscape :: Bool
+} deriving (Show)
 
 defaultConfig = JsonConfig {
     indentDepth = 1,
@@ -55,7 +55,7 @@ defaultConfig = JsonConfig {
 
 -- Config writing / reading isomorphisms
 
-indent :: IsoM String ()
+indent :: IsoM JsonConfig String ()
 indent = IsoM f g where
     f _ = return ()
     g () = do
@@ -66,7 +66,7 @@ increaseIndent :: JsonConfig -> JsonConfig
 increaseIndent c = c {indentDepth = 1 + indentDepth c}
 
 
-spaceFromConfig :: IsoM String ()
+spaceFromConfig :: IsoM JsonConfig String ()
 spaceFromConfig = IsoM f g where
     f _ = return ()
     g () = do
@@ -88,7 +88,7 @@ escape = elements [
     ]
 
 
-string :: Syntax delta => delta String
+string :: Syntax delta => delta JsonConfig String
 string = between (text "\"") (text "\"") (many char) where
 
     char = bareChar <|> escapeChar <|> unicodeEscapeChar
@@ -105,13 +105,13 @@ string = between (text "\"") (text "\"") (many char) where
 
 -- Syntax
 
-newline :: Syntax delta => delta ()
+newline :: Syntax delta => delta JsonConfig ()
 newline = ignore "\n" <$> many space
 
-ignoreSpace :: Syntax delta => delta ()
+ignoreSpace :: Syntax delta => delta JsonConfig ()
 ignoreSpace  =   ignore "" <$> many space
 
-json :: Syntax delta => delta JValue
+json :: Syntax delta => delta JsonConfig JValue
 json = indented value where
 
     value

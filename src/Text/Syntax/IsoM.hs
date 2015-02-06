@@ -6,38 +6,18 @@ import Control.Monad.Reader (ReaderT, lift)
 
 import Control.Isomorphism.Partial.Unsafe (Iso (Iso))
 
--- TODO: make this polimorphic
 
-data JsonConfig = JsonConfig {
-    indentDepth :: Int,
-    indentOneLevel :: String,
-    spaceAfterColon :: Bool,
-    unicodeEscape :: Bool
-} deriving (Show)
+type MaybeR c = ReaderT c Maybe
 
-type Config = JsonConfig
+data IsoM c alpha beta
+  = IsoM (alpha -> Maybe beta) (beta -> MaybeR c alpha)
 
 
--- data ConfigC = ConfigC {
-		-- indentDepth :: Int,
-		-- indentOneLevel :: String,
-		-- brackets::Bool,
-		-- ifNewLine::Bool
--- } deriving (Show)
-
--- type Config = ConfigC
-
-type MaybeR = ReaderT Config Maybe
-
-data IsoM alpha beta
-  = IsoM (alpha -> Maybe beta) (beta -> MaybeR alpha)
-
-
-applyM :: IsoM alpha beta -> alpha -> Maybe beta
+applyM :: IsoM c alpha beta -> alpha -> Maybe beta
 applyM (IsoM f g) = f
 
-unapplyM :: IsoM alpha beta -> beta -> MaybeR alpha
+unapplyM :: IsoM c alpha beta -> beta -> MaybeR c alpha
 unapplyM (IsoM f g) = g
 
-fromIso :: Iso alpha beta -> IsoM alpha beta
+fromIso :: Iso alpha beta -> IsoM c alpha beta
 fromIso (Iso f g) = IsoM f (lift . g)
