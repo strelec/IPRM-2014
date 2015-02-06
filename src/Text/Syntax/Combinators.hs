@@ -118,4 +118,4 @@ space :: Syntax delta => delta c Char
 space   =  subset isSpace  <$> token
 
 thisChar :: Syntax delta => Char -> delta c Char
-thisChar ch = (subset (\x -> x == ch)) <$> token
+thisChar ch = subset (== ch) <$> token
