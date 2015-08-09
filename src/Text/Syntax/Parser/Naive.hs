@@ -4,12 +4,11 @@ import Prelude (String, ($), map, (.), (++), const)
 
 import Text.Syntax.Classes (IsoFunctor ((<$>), (<$$>), (<-$>)), ProductFunctor ((<*>)), Alternative ((<|>), empty), Syntax (pure, token))
 import Text.Syntax.IsoM (applyM, fromIso)
-import Text.Syntax.Util (uncons)
 
 import Control.Monad (Monad, return, fail, (>>=))
 
 import Data.Maybe (Maybe (Just), maybeToList)
-
+import Data.List (uncons)
 
 
 newtype Parser c alpha
